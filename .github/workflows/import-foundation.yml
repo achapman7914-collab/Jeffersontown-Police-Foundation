@@ -1,0 +1,49 @@
+name: Import Foundation Website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-foundation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Foundation repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check out current source repository
+        uses: actions/checkout@v4
+        with:
+          repository: achapman7914-collab/KAPSS-Interactive-Map
+          ref: main
+          path: _source
+
+      - name: Copy Foundation site to repository root
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s dotglob nullglob
+          cp -a _source/foundation-preview/. ./
+          rm -rf _source
+
+      - name: Commit imported Foundation site
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to import."
+            exit 0
+          fi
+          git commit -m "Import Foundation website from KAPSS repository"
+          git push origin main
