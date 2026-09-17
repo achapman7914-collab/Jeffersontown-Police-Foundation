@@ -8,6 +8,14 @@
         grid-template-columns:32% 68%!important;
         min-height:340px!important;
       }
+      .initiatives .initiative-photo{
+        min-height:340px!important;
+        background-image:url('dfr-drone-display.png?v=20260917-fill1')!important;
+        background-size:cover!important;
+        background-position:center center!important;
+        background-repeat:no-repeat!important;
+        background-color:transparent!important;
+      }
       .initiatives .initiative-copy{
         padding:36px 38px!important;
       }
@@ -16,6 +24,10 @@
           max-width:100%!important;
           grid-template-columns:1fr!important;
           min-height:0!important;
+        }
+        .initiatives .initiative-photo{
+          min-height:280px!important;
+          background-size:cover!important;
         }
       }
     `;
