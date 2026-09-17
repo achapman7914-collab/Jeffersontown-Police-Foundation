@@ -4,20 +4,17 @@
     const style=document.createElement('style');
     style.textContent=`
       .initiatives .initiative{
-        max-width:850px!important;
-        grid-template-columns:32% 68%!important;
+        max-width:1220px!important;
+        grid-template-columns:50% 50%!important;
         min-height:340px!important;
       }
       .initiatives .initiative-photo{
         min-height:340px!important;
-        background-image:url('dfr-drone-display.png?v=20260917-fill1')!important;
-        background-size:cover!important;
-        background-position:center center!important;
-        background-repeat:no-repeat!important;
+        background:url('dfr-hero-clean.jpg?v=20260917-badge1') center center/cover no-repeat!important;
         background-color:transparent!important;
       }
       .initiatives .initiative-copy{
-        padding:36px 38px!important;
+        padding:44px 46px!important;
       }
       @media(max-width:900px){
         .initiatives .initiative{
@@ -27,7 +24,7 @@
         }
         .initiatives .initiative-photo{
           min-height:280px!important;
-          background-size:cover!important;
+          background:url('dfr-hero-clean.jpg?v=20260917-badge1') center center/cover no-repeat!important;
         }
       }
     `;
