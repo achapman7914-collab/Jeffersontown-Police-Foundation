@@ -34,6 +34,17 @@ jobs:
           cp -a _source/foundation-preview/. ./
           rm -rf _source
 
+      - name: Refresh DFR drone image URL
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('dfr.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace("url('dfr-hero-clean.jpg')", "url('dfr-hero-clean.jpg?v=20260917-1534')")
+          p.write_text(s, encoding='utf-8')
+          PY
+
       - name: Commit imported Foundation site
         shell: bash
         run: |
