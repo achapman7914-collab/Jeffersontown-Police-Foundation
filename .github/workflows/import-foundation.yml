@@ -34,14 +34,28 @@ jobs:
           cp -a _source/foundation-preview/. ./
           rm -rf _source
 
-      - name: Refresh DFR drone image URL
+      - name: Normalize DFR drone image and wire it directly into card 2
         shell: bash
         run: |
+          set -euo pipefail
+          python -m pip install --quiet pillow
           python - <<'PY'
           from pathlib import Path
+          from PIL import Image
+
+          src = Path('dfr-hero-clean.jpg')
+          out = Path('dfr-drone-display.jpg')
+          with Image.open(src) as im:
+              im = im.convert('RGB')
+              im.save(out, 'JPEG', quality=92, optimize=True)
+
           p = Path('dfr.html')
           s = p.read_text(encoding='utf-8')
-          s = s.replace("url('dfr-hero-clean.jpg')", "url('dfr-hero-clean.jpg?v=20260917-1534')")
+          old_css = ".drone-img{background-image:linear-gradient(rgba(2,10,18,.08),rgba(2,10,18,.24)),url('dfr-hero-clean.jpg')}"
+          new_css = ".drone-img{background:#071827}.drone-img img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}"
+          s = s.replace(old_css, new_css)
+          s = s.replace(".drone-img{background-image:linear-gradient(rgba(2,10,18,.08),rgba(2,10,18,.24)),url('dfr-hero-clean.jpg?v=20260917-1534')}", new_css)
+          s = s.replace('<div class="flow-image drone-img"></div>', '<div class="flow-image drone-img"><img src="dfr-drone-display.jpg?v=20260917-1541" alt="Drone launching for a DFR response"></div>')
           p.write_text(s, encoding='utf-8')
           PY
 
