@@ -33,14 +33,6 @@
     document.head.appendChild(style);
   };
 
-  const updateDonateLinks=()=>{
-    document.querySelectorAll('a[href="donate.html"],a[href="./donate.html"],a[href$="/donate.html"]').forEach((link)=>{
-      link.href=GIVEBUTTER_URL;
-      link.target='_blank';
-      link.rel='noopener noreferrer';
-    });
-  };
-
   const enhanceDonatePage=()=>{
     if(!location.pathname.toLowerCase().endsWith('/donate.html')) return;
 
@@ -80,10 +72,8 @@
   const finish=()=>{
     applyDonateCardFix();
     enhanceDonatePage();
-    updateDonateLinks();
   };
 
-  updateDonateLinks();
   enhanceDonatePage();
 
   const base=document.createElement('script');
