@@ -1,0 +1,69 @@
+name: Fix Donation Page Navigation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-donate-navigation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-donate-navigation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Foundation repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Keep Donate links on Foundation Ways to Give page
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          # Cache-bust the site footer script and make Donate links immune to
+          # the previously cached redirect script by adding a harmless query.
+          for p in Path('.').glob('*.html'):
+              s = p.read_text(encoding='utf-8')
+              s = s.replace('href="donate.html"', 'href="donate.html?ways=1"')
+              s = s.replace('href="./donate.html"', 'href="donate.html?ways=1"')
+              s = s.replace('site-footer.js?v=20260903', 'site-footer.js?v=20260918-ways2')
+              p.write_text(s, encoding='utf-8')
+
+          # Make the dynamically generated footer Donate link use the same URL.
+          base = Path('site-footer-base-20260917.js')
+          if base.exists():
+              s = base.read_text(encoding='utf-8')
+              s = s.replace('href="donate.html">Donate</a>', 'href="donate.html?ways=1">Donate</a>')
+              base.write_text(s, encoding='utf-8')
+
+          # Safety cleanup: remove the old JavaScript behavior that redirected
+          # every Foundation Donate link straight to Givebutter, if it exists.
+          footer = Path('site-footer.js')
+          if footer.exists():
+              s = footer.read_text(encoding='utf-8')
+              s = re.sub(r'\n  const updateDonateLinks=\(\)=>\{.*?\n  \};\n', '\n', s, flags=re.S)
+              s = s.replace('    updateDonateLinks();\n', '')
+              s = s.replace('  updateDonateLinks();\n', '')
+              footer.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit donation navigation fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes needed."
+            exit 0
+          fi
+          git commit -m "Fix Donate navigation and refresh cached footer script"
+          git push origin main
