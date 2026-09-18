@@ -60,7 +60,8 @@
           <div class="give-icon">♥</div>
           <h3>Donate Online with Givebutter</h3>
           <div class="gold-rule"></div>
-          <p>Make a secure one-time or recurring gift online. You can support the General Fund or choose Department Wellness, REACH, Community Engagement, Officer in Distress, Training &amp; Equipment, or Drone First Responder (DFR).</p>
+          <p><strong>Givebutter is our secure online giving platform.</strong> Donate using a major credit or debit card, Venmo, PayPal, Cash App Pay, Apple Pay, Google Pay, or bank transfer (ACH), depending on your device and available payment options.</p>
+          <p>You can make a one-time gift or set up a recurring donation with supported payment methods. Choose the General Fund or designate your gift to Department Wellness, REACH, Community Engagement, Officer in Distress, Training &amp; Equipment, or Drone First Responder (DFR).</p>
         </div>
         <div class="qr-panel">
           <strong style="font-size:18px;margin-bottom:14px">Secure Online Giving</strong>
