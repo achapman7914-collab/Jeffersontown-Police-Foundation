@@ -55,6 +55,15 @@ h1{font-size:clamp(38px,5vw,60px);line-height:1.07;margin:15px 0}
 .footer a{color:#efd39f}
 @media(max-width:700px){.nav{gap:14px}.nav a{font-size:10px}.nav .donate-link{margin-left:0}.choice-grid{grid-template-columns:1fr}.plaque,.tribute-photo{flex-basis:300px}.hero{padding:46px 18px}.brand img{width:66px;height:66px}}
 @media(prefers-reduced-motion:reduce){.wall-track.is-scrolling{animation:none;flex-wrap:wrap;justify-content:center;width:auto}}
+
+/* Deep bronze memorial plaques with engraved brass borders */
+.plaque{border:5px solid #575047;border-radius:5px;background:linear-gradient(130deg,#a58b5e 0%,#28231d 10%,#4b4438 20%,#161516 55%,#9d8355 100%);box-shadow:0 2px 0 #bfa372 inset,0 15px 32px rgba(0,0,0,.25);padding:13px;min-height:263px;color:#efd19a}
+.plaque-inner{position:relative;background:radial-gradient(ellipse at 50% 5%,#393026,#100f10 76%);border:3px ridge #bd9552;outline:1px solid #efc877;outline-offset:-10px;padding:28px 18px}
+.plaque-inner::before,.plaque-inner::after{content:"";position:absolute;top:8px;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff2bc,#bb934b 50%,#463216 80%);box-shadow:0 1px 2px #000}
+.plaque-inner::before{left:8px}.plaque-inner::after{right:8px}
+.plaque .emblem,.plaque .kind{color:#e7c581;text-shadow:0 1px 2px #000}
+.plaque h3{color:#f9dda2;text-shadow:0 2px 2px #000;font-size:32px}
+.plaque .message{color:#e9d4a5}
 </style></head>
 <body>
 <div class="topline"><div class="wrap"><span>Honor • Service • Community</span><span>Jeffersontown, Kentucky</span></div></div>
