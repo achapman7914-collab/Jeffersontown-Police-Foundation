@@ -70,7 +70,7 @@ async function load(){
  content.append(el("span",it.status,"pill"),el("h3",it.honoree_name));
  const dl=el("dl");pair(dl,"Submitted by",it.donor_name);pair(dl,"Email",it.donor_email);
  pair(dl,"Receipt reference",it.donation_reference);pair(dl,"Date",new Date(it.submitted_at).toLocaleString());
- pair(dl,"Photo permission",it.consent_to_display?"Yes":"No");content.append(dl);
+ pair(dl,"Photo permission",it.consent_to_display?"Yes":"No");pair(dl,"Payment record",it.payment_status==="recorded_for_review"?"Matching transaction received — needs verification":it.payment_status==="ambiguous"?"Multiple possible matches — manual review required":"No matching transaction recorded");content.append(dl);
  const actions=el("div",undefined,"actions");
  for(const [decision,label,style] of [["approved","Approve photo","approve"],["rejected","Reject photo","reject"],["pending","Reset pending","outline"]]){
  const button=el("button",label,style);button.type="button";button.disabled=it.status===decision;
