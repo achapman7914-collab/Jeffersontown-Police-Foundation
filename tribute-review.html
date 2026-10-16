@@ -30,10 +30,10 @@ button:disabled{opacity:.5;cursor:not-allowed}.outline{background:white;color:va
 <header><h1>Tribute Review Center</h1><p>Jeffersontown Police Foundation · Authorized staff only</p></header>
 <main>
 <section id="login" class="panel"><h2>Reviewer Sign-In</h2><p>Enter your authorized Foundation email address and password.</p>
-<form id="passwordForm"><label for="email">Email address</label><input id="email" type="email" autocomplete="email" required><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required><p><button type="submit" id="passwordButton">Sign In Securely</button></p></form><p class="note">For first-time password setup, use Supabase password recovery when email delivery is available. Never share your password.</p>
+<form id="passwordForm"><label for="email">Email address</label><input id="email" type="email" autocomplete="email" required><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required><p><button type="submit" id="passwordButton">Sign In Securely</button></p></form><p class="note">Need to set your password? Use the password recovery option below when email delivery is available.</p><button id="requestReset" type="button" class="outline">Request Password Reset Email</button>
 <p id="loginStatus" class="status" role="status"></p>
 <p class="note">Only email addresses approved by the Foundation can access submissions. Never share a sign-in link.</p></section>
-<section id="review">
+<section id="reset" class="panel" style="display:none"><h2>Set Your New Password</h2><p>Your recovery link has been verified. Choose a strong password for your account.</p><form id="resetForm"><label for="newPassword">New password</label><input id="newPassword" type="password" autocomplete="new-password" minlength="12" required><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" required><p><button id="savePassword" type="submit">Save New Password</button></p></form><p id="resetStatus" class="status" role="status"></p></section><section id="review">
 <div class="toolbar"><div><h2>Photo Submissions</h2><p class="note">Approval means photo review only. It does not verify a payment or publish a tribute.</p></div><div><button id="refresh" class="outline" type="button">Refresh</button> <button id="logout" class="outline" type="button">Sign Out</button></div></div>
 <p id="reviewStatus" class="status" role="status"></p><div id="items" class="cards"></div></section>
 </main>
@@ -41,10 +41,12 @@ button:disabled{opacity:.5;cursor:not-allowed}.outline{background:white;color:va
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 const db=createClient("https://etvfgmdsgblgffsllcib.supabase.co","sb_publishable_96q-rOLpBy_Bxb0mZX8QIQ_cMWbRmzU",{auth:{flowType:"pkce",detectSessionInUrl:true}});
 const api="https://etvfgmdsgblgffsllcib.supabase.co/functions/v1/tribute-review-admin";
-const login=document.getElementById("login"),review=document.getElementById("review"),
+const login=document.getElementById("login"),review=document.getElementById("review"),reset=document.getElementById("reset"),
  loginStatus=document.getElementById("loginStatus"),reviewStatus=document.getElementById("reviewStatus"),
  items=document.getElementById("items");
 const display=(node,message)=>{node.textContent=message};
+let recoveryMode=false;
+function showRecovery(){recoveryMode=true;login.style.display="none";review.style.display="none";reset.style.display="block";}
 async function call(method="GET",body){
  const {data:{session}}=await db.auth.getSession();
  if(!session)throw Error("Your session has expired. Please sign in again.");
@@ -85,6 +87,7 @@ async function load(){
  }catch(err){display(reviewStatus,err.message)}
 }
 async function init(){
+ if(recoveryMode)return;
  const {data:{session}}=await db.auth.getSession();
  if(!session){login.style.display="block";review.style.display="none";return}
  try{await call();login.style.display="none";review.style.display="block";await load()}
@@ -96,8 +99,27 @@ document.getElementById("passwordForm").addEventListener("submit",async e=>{
  if(error)throw error;document.getElementById("password").value="";await init();
  }catch(err){display(loginStatus,err.message)}finally{button.disabled=false}
 });
+document.getElementById("requestReset").addEventListener("click",async()=>{
+ const email=document.getElementById("email").value.trim();
+ if(!email||!document.getElementById("email").checkValidity()){display(loginStatus,"Enter your email address first.");return}
+ const btn=document.getElementById("requestReset");btn.disabled=true;
+ try{const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:"https://jtownpf.org/tribute-review.html"});if(error)throw error;
+ display(loginStatus,"If an eligible account exists, a recovery email has been requested. Open only the most recent link.");}
+ catch(e){display(loginStatus,e.message)}finally{btn.disabled=false}
+});
+document.getElementById("resetForm").addEventListener("submit",async e=>{
+ e.preventDefault();const password=document.getElementById("newPassword").value;
+ const confirmation=document.getElementById("confirmPassword").value;
+ if(password!==confirmation){display(document.getElementById("resetStatus"),"Passwords do not match.");return}
+ const btn=document.getElementById("savePassword");btn.disabled=true;
+ try{const {error}=await db.auth.updateUser({password});if(error)throw error;
+ document.getElementById("newPassword").value="";document.getElementById("confirmPassword").value="";
+ display(document.getElementById("resetStatus"),"Password saved. You can now use email and password to sign in.");
+ recoveryMode=false;await db.auth.signOut();reset.style.display="none";login.style.display="block";}
+ catch(err){display(document.getElementById("resetStatus"),err.message)}finally{btn.disabled=false}
+});
 document.getElementById("logout").addEventListener("click",async()=>{await db.auth.signOut();location.reload()});
 document.getElementById("refresh").addEventListener("click",load);
-db.auth.onAuthStateChange(()=>setTimeout(init,0));
+db.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY"){showRecovery();return}setTimeout(init,0)});
 init();
 </script></body></html>
