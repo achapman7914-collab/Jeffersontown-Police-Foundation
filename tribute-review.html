@@ -82,7 +82,7 @@ async function load(){
  for(const [decision,label,style] of [["approved",it.submission_kind==="plaque"?"Approve plaque":"Approve photo","approve"],["rejected",it.submission_kind==="plaque"?"Reject plaque":"Reject photo","reject"],["pending","Reset pending","outline"]]){
  const button=el("button",label,style);button.type="button";button.disabled=it.status===decision;
  button.addEventListener("click",async()=>{
-  if(decision==="approved"&&it.submission_kind==="plaque"&&!it.consent_to_display&&!consent.checked){display(reviewStatus,"To approve this earlier plaque, first check the donor publication-permission box in Final Publication Review.");return}
+  if(decision==="approved"&&it.submission_kind==="plaque"&&!it.consent_to_display&&!consent.checked){display(reviewStatus,"To approve this earlier plaque, first check the donor publication-permission box in Final Publication Review · Editing enabled soon.");return}
   if(!window.confirm(label+" for "+it.honoree_name+"? This does not publish a tribute."))return;
   button.disabled=true;
   try{await call("POST",{id:it.id,decision,submission_kind:it.submission_kind||"photo",consent_confirmed:consent.checked});await load()}catch(err){display(reviewStatus,err.message);button.disabled=false}
