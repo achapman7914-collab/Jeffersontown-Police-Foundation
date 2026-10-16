@@ -89,7 +89,7 @@ async function load(){
  });
  actions.append(button);
  }
- content.append(actions,el("p",it.submission_kind==="plaque"?"Plaque approval is private review only. Publication requires matching a successful Givebutter payment and a separate final check.":"Publishing requires an approved photo, public-display permission, a verified Givebutter donation, and final review of tribute details.","note"));
+ if(it.payment_status==="published"){actions.replaceChildren();actions.hidden=true;content.append(el("p","Published tribute — approval is locked. Only the public message can be edited here.","note"));}else{content.append(actions,el("p",it.submission_kind==="plaque"?"Plaque approval is private review only. Publication requires matching a successful Givebutter payment and a separate final check.":"Publishing requires an approved photo, public-display permission, a verified Givebutter donation, and final review of tribute details.","note"));}
  const finalBox=el("div",undefined,"final-review");
  const title=el("h4","Final Publication Review");finalBox.append(title);
  const nameLabel=el("label","Honoree name (must match submission)");const honoree=el("input");honoree.value=it.honoree_name;honoree.maxLength=120;nameLabel.append(honoree);finalBox.append(nameLabel);
