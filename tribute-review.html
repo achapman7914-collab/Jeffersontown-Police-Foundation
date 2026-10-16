@@ -34,13 +34,13 @@ button:disabled{opacity:.5;cursor:not-allowed}.outline{background:white;color:va
 <p id="loginStatus" class="status" role="status"></p>
 <p class="note">Only email addresses approved by the Foundation can access submissions. Never share a sign-in link.</p></section>
 <section id="reset" class="panel" style="display:none"><h2>Set Your New Password</h2><p>Your recovery link has been verified. Choose a strong password for your account.</p><form id="resetForm"><label for="newPassword">New password</label><input id="newPassword" type="password" autocomplete="new-password" minlength="12" required><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" required><p><button id="savePassword" type="submit">Save New Password</button></p></form><p id="resetStatus" class="status" role="status"></p></section><section id="review">
-<div class="toolbar"><div><h2>Photo Submissions</h2><p class="note">Approval means photo review only. It does not verify a payment or publish a tribute.</p></div><div><button id="refresh" class="outline" type="button">Refresh</button> <button id="logout" class="outline" type="button">Sign Out</button></div></div>
+<div class="toolbar"><div><h2>Tribute Submissions</h2><p class="note">Approval means submission review only. It does not verify a payment or publish a tribute.</p></div><div><button id="refresh" class="outline" type="button">Refresh</button> <button id="logout" class="outline" type="button">Sign Out</button></div></div>
 <p id="reviewStatus" class="status" role="status"></p>
 <div class="review-groups">
 <section class="review-group"><h3>Pending Tribute Review <span id="pendingCount">0</span></h3><div id="pendingItems" class="cards"></div></section>
 <section class="review-group"><h3>Awaiting Payment <span id="waitingCount">0</span></h3><div id="waitingItems" class="cards"></div></section>
 <section class="review-group"><h3>Payment Match Needs Review <span id="matchingCount">0</span></h3><div id="matchingItems" class="cards"></div></section>
-<section class="review-group"><h3>Rejected Photos <span id="rejectedCount">0</span></h3><div id="rejectedItems" class="cards"></div></section>
+<section class="review-group"><h3>Rejected Tributes <span id="rejectedCount">0</span></h3><div id="rejectedItems" class="cards"></div></section>
 <section class="review-group"><h3>Published Tributes <span id="publishedCount">0</span></h3><div id="publishedItems" class="cards"></div></section>
 </div></section>
 </main>
@@ -68,7 +68,7 @@ async function load(){
  display(reviewStatus,"Loading submissions…");
  try{
  const {items:rows}=await call();for(const id of groupIds)document.getElementById(id).replaceChildren();const counts={pendingItems:0,waitingItems:0,matchingItems:0,rejectedItems:0,publishedItems:0};
- if(!rows.length){display(reviewStatus,"No photographs have been submitted yet.");return}
+ if(!rows.length){display(reviewStatus,"No tributes have been submitted yet.");return}
  display(reviewStatus,rows.length+" submission(s) found.");
  for(const it of rows){
  const card=el("article",undefined,"item");
@@ -92,21 +92,21 @@ async function load(){
  const finalBox=el("div",undefined,"final-review");
  const title=el("h4","Final Publication Review");finalBox.append(title);
  const nameLabel=el("label","Honoree name (must match submission)");const honoree=el("input");honoree.value=it.honoree_name;honoree.maxLength=120;nameLabel.append(honoree);finalBox.append(nameLabel);
- const msgLabel=el("label","Tribute message");const msg=el("textarea");msg.rows=3;msg.maxLength=600;msgLabel.append(msg);finalBox.append(msgLabel);
+ const msgLabel=el("label","Tribute message");const msg=el("textarea");msg.rows=3;msg.maxLength=600;msg.value=it.tribute_message||"";msgLabel.append(msg);finalBox.append(msgLabel);
  const typeLabel=el("label","Tribute dedication");const kind=el("select");
  for(const [value,label] of [["memory","In Memory Of"],["honor","In Honor Of"]]){const option=el("option",label);option.value=value;kind.append(option)}
- typeLabel.append(kind);finalBox.append(typeLabel);
+ if(it.tribute_type)kind.value=it.tribute_type;typeLabel.append(kind);finalBox.append(typeLabel);
  const consentLabel=el("label","Confirm Givebutter public-display permission");const consent=el("input");consent.type="checkbox";consent.style.width="auto";consentLabel.prepend(consent);finalBox.append(consentLabel);
  const publishButton=el("button","Publish Tribute to Wall","publish-button");
  publishButton.type="button";
- const canPublish=it.submission_kind!=="plaque"&&it.payment_status!=="published"&&it.status==="approved"&&it.consent_to_display===true&&it.payment_status==="recorded_for_review"&&!!it.transaction_id;
+ const canPublish=it.payment_status!=="published"&&it.status==="approved"&&it.consent_to_display===true&&it.payment_status==="recorded_for_review"&&!!it.transaction_id;
  publishButton.disabled=!canPublish;
- if(!canPublish){publishButton.textContent=it.payment_status==="published"?"Already Published":"Publish Tribute — Awaiting Payment Verification";publishButton.title="Requires an approved photo and matching Givebutter transaction";}
+ if(!canPublish){publishButton.textContent=it.payment_status==="published"?"Already Published":"Publish Tribute — Awaiting Payment Verification";publishButton.title="Requires an approved tribute and matching successful Givebutter transaction";}
  else publishButton.addEventListener("click",async()=>{
   if(!consent.checked){display(reviewStatus,"First confirm public-display permission in Givebutter.");return}
-  if(!window.confirm("Publish this tribute publicly? The photo, name, and message will be visible on the Foundation website."))return;
+  if(!window.confirm("Publish this tribute publicly? The tribute name, message, and any approved photo will be visible on the Foundation website."))return;
   publishButton.disabled=true;
-  try{await call("POST",{id:it.id,decision:"publish",honoree:honoree.value,message:msg.value,tribute_type:kind.value,consent_confirmed:consent.checked});await load()}
+  try{await call("POST",{id:it.id,decision:"publish",submission_kind:it.submission_kind||"photo",honoree:honoree.value,message:msg.value,tribute_type:kind.value,consent_confirmed:consent.checked});await load()}
   catch(err){display(reviewStatus,err.message);publishButton.disabled=false}
  });
  finalBox.append(publishButton);content.append(finalBox);card.append(content);
