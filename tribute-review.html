@@ -29,9 +29,8 @@ button:disabled{opacity:.5;cursor:not-allowed}.outline{background:white;color:va
 </style></head><body>
 <header><h1>Tribute Review Center</h1><p>Jeffersontown Police Foundation · Authorized staff only</p></header>
 <main>
-<section id="login" class="panel"><h2>Reviewer Sign-In</h2><p>Enter your authorized Foundation email address. We'll send you a secure sign-in link.</p>
-<form id="signInForm"><label for="email">Email address</label><input id="email" type="email" autocomplete="email" required>
-<p><button type="submit" id="sendLink">Email Sign-In Link</button></p></form>
+<section id="login" class="panel"><h2>Reviewer Sign-In</h2><p>Enter your authorized Foundation email address and password.</p>
+<form id="passwordForm"><label for="email">Email address</label><input id="email" type="email" autocomplete="email" required><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required><p><button type="submit" id="passwordButton">Sign In Securely</button></p></form><p class="note">For first-time password setup, use Supabase password recovery when email delivery is available. Never share your password.</p>
 <p id="loginStatus" class="status" role="status"></p>
 <p class="note">Only email addresses approved by the Foundation can access submissions. Never share a sign-in link.</p></section>
 <section id="review">
@@ -91,12 +90,10 @@ async function init(){
  try{await call();login.style.display="none";review.style.display="block";await load()}
  catch(err){login.style.display="block";review.style.display="none";display(loginStatus,err.message)}
 }
-document.getElementById("signInForm").addEventListener("submit",async e=>{
- e.preventDefault();const button=document.getElementById("sendLink");button.disabled=true;
- try{
- const {error}=await db.auth.signInWithOtp({email:document.getElementById("email").value.trim(),options:{emailRedirectTo:"https://jtownpf.org/tribute-review.html",shouldCreateUser:false}});
- if(error)throw error;
- display(loginStatus,"If your email has been registered for reviewer access, a sign-in link will arrive shortly.");
+document.getElementById("passwordForm").addEventListener("submit",async e=>{
+ e.preventDefault();const button=document.getElementById("passwordButton");button.disabled=true;
+ try{const {error}=await db.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});
+ if(error)throw error;document.getElementById("password").value="";await init();
  }catch(err){display(loginStatus,err.message)}finally{button.disabled=false}
 });
 document.getElementById("logout").addEventListener("click",async()=>{await db.auth.signOut();location.reload()});
