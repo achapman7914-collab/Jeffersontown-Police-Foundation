@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tribute Review | Jeffersontown Police Foundation</title>
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#071c37;--gold:#c39243;--line:#dbe0e9}*{box-sizing:border-box}body{margin:0;background:#f6f7fa;color:#132945;font:15px/1.6 Inter,Arial,sans-serif}
+header{background:var(--navy);color:white;padding:24px max(20px,calc((100% - 1100px)/2))}
+header h1{font:normal 32px Georgia,serif;margin:0}header p{margin:4px 0;color:#d7dce3}
+main{max-width:1100px;margin:38px auto 70px;padding:0 20px}
+.panel{background:white;border:1px solid var(--line);padding:28px;border-radius:9px;box-shadow:0 8px 20px #091f3810}
+label{font-weight:750;font-size:13px;display:block;margin:15px 0 5px}input{padding:12px;width:100%;max-width:450px;border:1px solid #aeb9c8;border-radius:5px;font:inherit}
+button{background:var(--navy);color:white;border:0;border-radius:5px;padding:12px 19px;font:700 14px Inter,Arial;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}.outline{background:white;color:var(--navy);border:1px solid #9caabc}
+.status{margin:16px 0;font-size:13px}#login h2{font:normal 27px Georgia,serif;margin:0}
+.toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 20px}.toolbar h2{margin:0;font:normal 28px Georgia,serif}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px}
+.item{background:white;border:1px solid var(--line);border-radius:8px;overflow:hidden;box-shadow:0 5px 15px #091f380c}
+.item img{width:100%;height:260px;object-fit:contain;background:#e8edf3}
+.item-content{padding:20px}
+.item h3{font:normal 24px Georgia,serif;margin:0 0 8px}
+.item dl{display:grid;grid-template-columns:95px minmax(0,1fr);gap:4px;font-size:12px;overflow-wrap:anywhere}
+.item dt{color:#566577}.item dd{margin:0}
+.pill{display:inline-block;border-radius:30px;background:#edf0f5;color:#314967;padding:3px 10px;font-size:11px;font-weight:800;text-transform:uppercase}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.approve{background:#24563b}.reject{background:#973e3e}
+.note{color:#52627a;font-size:12px}#review{display:none}
+@media(max-width:600px){header h1{font-size:26px}main{margin-top:20px}.panel{padding:19px}}
+</style></head><body>
+<header><h1>Tribute Review Center</h1><p>Jeffersontown Police Foundation · Authorized staff only</p></header>
+<main>
+<section id="login" class="panel"><h2>Reviewer Sign-In</h2><p>Enter your authorized Foundation email address. We'll send you a secure sign-in link.</p>
+<form id="signInForm"><label for="email">Email address</label><input id="email" type="email" autocomplete="email" required>
+<p><button type="submit" id="sendLink">Email Sign-In Link</button></p></form>
+<p id="loginStatus" class="status" role="status"></p>
+<p class="note">Only email addresses approved by the Foundation can access submissions. Never share a sign-in link.</p></section>
+<section id="review">
+<div class="toolbar"><div><h2>Photo Submissions</h2><p class="note">Approval means photo review only. It does not verify a payment or publish a tribute.</p></div><div><button id="refresh" class="outline" type="button">Refresh</button> <button id="logout" class="outline" type="button">Sign Out</button></div></div>
+<p id="reviewStatus" class="status" role="status"></p><div id="items" class="cards"></div></section>
+</main>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
+const db=createClient("https://etvfgmdsgblgffsllcib.supabase.co","sb_publishable_96q-rOLpBy_Bxb0mZX8QIQ_cMWbRmzU",{auth:{flowType:"pkce",detectSessionInUrl:true}});
+const api="https://etvfgmdsgblgffsllcib.supabase.co/functions/v1/tribute-review-admin";
+const login=document.getElementById("login"),review=document.getElementById("review"),
+ loginStatus=document.getElementById("loginStatus"),reviewStatus=document.getElementById("reviewStatus"),
+ items=document.getElementById("items");
+const display=(node,message)=>{node.textContent=message};
+async function call(method="GET",body){
+ const {data:{session}}=await db.auth.getSession();
+ if(!session)throw Error("Your session has expired. Please sign in again.");
+ const res=await fetch(api,{method,headers:{"Authorization":"Bearer "+session.access_token,...(body?{"Content-Type":"application/json"}:{})},body:body?JSON.stringify(body):undefined});
+ const data=await res.json();
+ if(!res.ok)throw Error(data.error||"Request failed");
+ return data;
+}
+function el(tag,text,className){const n=document.createElement(tag);if(text!==undefined)n.textContent=String(text);if(className)n.className=className;return n}
+function pair(dl,label,value){dl.append(el("dt",label),el("dd",value||"—"))}
+async function load(){
+ display(reviewStatus,"Loading submissions…");
+ try{
+ const {items:rows}=await call();items.replaceChildren();
+ if(!rows.length){display(reviewStatus,"No photographs have been submitted yet.");return}
+ display(reviewStatus,rows.length+" submission(s) found.");
+ for(const it of rows){
+ const card=el("article",undefined,"item");
+ if(it.preview_url){const img=el("img");img.src=it.preview_url;img.alt="Photo submitted for "+it.honoree_name;img.referrerPolicy="no-referrer";card.append(img)}
+ const content=el("div",undefined,"item-content");
+ content.append(el("span",it.status,"pill"),el("h3",it.honoree_name));
+ const dl=el("dl");pair(dl,"Submitted by",it.donor_name);pair(dl,"Email",it.donor_email);
+ pair(dl,"Receipt reference",it.donation_reference);pair(dl,"Date",new Date(it.submitted_at).toLocaleString());
+ pair(dl,"Photo permission",it.consent_to_display?"Yes":"No");content.append(dl);
+ const actions=el("div",undefined,"actions");
+ for(const [decision,label,style] of [["approved","Approve photo","approve"],["rejected","Reject photo","reject"],["pending","Reset pending","outline"]]){
+ const button=el("button",label,style);button.type="button";button.disabled=it.status===decision;
+ button.addEventListener("click",async()=>{
+  if(!window.confirm(label+" for "+it.honoree_name+"? This does not publish a tribute."))return;
+  button.disabled=true;
+  try{await call("POST",{id:it.id,decision});await load()}catch(err){display(reviewStatus,err.message);button.disabled=false}
+ });
+ actions.append(button);
+ }
+ content.append(actions,el("p","Photo review does not automatically publish to the Tribute Wall.","note"));
+ card.append(content);items.append(card);
+ }
+ }catch(err){display(reviewStatus,err.message)}
+}
+async function init(){
+ const {data:{session}}=await db.auth.getSession();
+ if(!session){login.style.display="block";review.style.display="none";return}
+ try{await call();login.style.display="none";review.style.display="block";await load()}
+ catch(err){login.style.display="block";review.style.display="none";display(loginStatus,err.message)}
+}
+document.getElementById("signInForm").addEventListener("submit",async e=>{
+ e.preventDefault();const button=document.getElementById("sendLink");button.disabled=true;
+ try{
+ const {error}=await db.auth.signInWithOtp({email:document.getElementById("email").value.trim(),options:{emailRedirectTo:"https://jtownpf.org/tribute-review.html",shouldCreateUser:false}});
+ if(error)throw error;
+ display(loginStatus,"If your email has been registered for reviewer access, a sign-in link will arrive shortly.");
+ }catch(err){display(loginStatus,err.message)}finally{button.disabled=false}
+});
+document.getElementById("logout").addEventListener("click",async()=>{await db.auth.signOut();location.reload()});
+document.getElementById("refresh").addEventListener("click",load);
+db.auth.onAuthStateChange(()=>setTimeout(init,0));
+init();
+</script></body></html>
