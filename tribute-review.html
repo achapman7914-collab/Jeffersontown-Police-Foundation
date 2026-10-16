@@ -26,7 +26,7 @@ button:disabled{opacity:.5;cursor:not-allowed}.outline{background:white;color:va
 .approve{background:#24563b}.reject{background:#973e3e}
 .note{color:#52627a;font-size:12px}#review{display:none}
 @media(max-width:600px){header h1{font-size:26px}main{margin-top:20px}.panel{padding:19px}}
-.review-groups{display:grid;gap:25px}.review-group{padding:20px;border:1px solid #dce3ec;background:#fff;border-radius:9px}.review-group h3{margin:0 0 16px;font:normal 23px Georgia,serif}.review-group h3 span{font:700 12px Inter,Arial,sans-serif;background:#e8edf5;border-radius:20px;padding:4px 9px;margin-left:7px}.review-group .cards{grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}.review-group .item{max-width:520px}</style></head><body>
+.review-groups{display:grid;gap:25px}.review-group{padding:20px;border:1px solid #dce3ec;background:#fff;border-radius:9px}.review-group h3{margin:0 0 16px;font:normal 23px Georgia,serif}.review-group h3 span{font:700 12px Inter,Arial,sans-serif;background:#e8edf5;border-radius:20px;padding:4px 9px;margin-left:7px}.review-group .cards{grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}.review-group .item{max-width:520px}<style>.final-review{border-top:1px solid #dce1e8;margin-top:17px;padding-top:12px}.final-review h4{font:normal 20px Georgia,serif;margin:0 0 8px}.final-review textarea,.final-review select{display:block;width:100%;padding:10px;border:1px solid #adb9c8;border-radius:5px;font:inherit}.final-review label{font-size:12px}.publish-button{margin-top:15px;width:100%;background:#25513e}.publish-button:disabled{background:#8894a3}</style></head><body>
 <header><h1>Tribute Review Center</h1><p>Jeffersontown Police Foundation · Authorized staff only</p></header>
 <main>
 <section id="login" class="panel"><h2>Reviewer Sign-In</h2><p>Enter your authorized Foundation email address and password.</p>
@@ -89,7 +89,27 @@ async function load(){
  actions.append(button);
  }
  content.append(actions,el("p","Publishing requires an approved photo, public-display permission, a verified Givebutter donation, and final review of tribute details.","note"));
- const publishButton=el("button","Publish Tribute — Awaiting Payment Verification","outline");publishButton.type="button";publishButton.disabled=true;publishButton.title="Publishing will be available after donation matching and final content review are implemented.";content.append(publishButton);card.append(content);
+ const finalBox=el("div",undefined,"final-review");
+ const title=el("h4","Final Publication Review");finalBox.append(title);
+ const nameLabel=el("label","Honoree name (must match submission)");const honoree=el("input");honoree.value=it.honoree_name;honoree.maxLength=120;nameLabel.append(honoree);finalBox.append(nameLabel);
+ const msgLabel=el("label","Tribute message");const msg=el("textarea");msg.rows=3;msg.maxLength=600;msgLabel.append(msg);finalBox.append(msgLabel);
+ const typeLabel=el("label","Tribute dedication");const kind=el("select");
+ for(const [value,label] of [["memory","In Memory Of"],["honor","In Honor Of"]]){const option=el("option",label);option.value=value;kind.append(option)}
+ typeLabel.append(kind);finalBox.append(typeLabel);
+ const consentLabel=el("label","Confirm Givebutter public-display permission");const consent=el("input");consent.type="checkbox";consent.style.width="auto";consentLabel.prepend(consent);finalBox.append(consentLabel);
+ const publishButton=el("button","Publish Tribute to Wall","publish-button");
+ publishButton.type="button";
+ const canPublish=it.status==="approved"&&it.consent_to_display===true&&it.payment_status==="recorded_for_review"&&!!it.transaction_id;
+ publishButton.disabled=!canPublish;
+ if(!canPublish){publishButton.textContent="Publish Tribute — Awaiting Payment Verification";publishButton.title="Requires an approved photo and matching Givebutter transaction";}
+ else publishButton.addEventListener("click",async()=>{
+  if(!consent.checked){display(reviewStatus,"First confirm public-display permission in Givebutter.");return}
+  if(!window.confirm("Publish this tribute publicly? The photo, name, and message will be visible on the Foundation website."))return;
+  publishButton.disabled=true;
+  try{await call("POST",{id:it.id,decision:"publish",honoree:honoree.value,message:msg.value,tribute_type:kind.value,consent_confirmed:consent.checked});await load()}
+  catch(err){display(reviewStatus,err.message);publishButton.disabled=false}
+ });
+ finalBox.append(publishButton);content.append(finalBox);card.append(content);
  const group=it.status==="rejected"?"rejectedItems":it.status==="pending"?"pendingItems":it.payment_status==="recorded_for_review"||it.payment_status==="ambiguous"?"matchingItems":"waitingItems";
  document.getElementById(group).append(card);counts[group]++;
  }
