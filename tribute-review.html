@@ -77,7 +77,7 @@ async function load(){
  content.append(el("span",(it.submission_kind==="plaque"?"Plaque · ":"Photo · ")+it.status,"pill"),el("h3",it.honoree_name));if(it.submission_kind==="plaque")content.append(el("p",it.tribute_message||"","note"));
  const dl=el("dl");pair(dl,"Submitted by",it.donor_name);pair(dl,"Email",it.donor_email);
  pair(dl,"Receipt reference",it.donation_reference);pair(dl,"Date",new Date(it.submitted_at).toLocaleString());
- pair(dl,it.submission_kind==="plaque"?"Display permission":"Photo permission",it.consent_to_display?"Yes":"No");pair(dl,"Payment record",it.payment_status==="recorded_for_review"?"Matching transaction received — needs verification":it.payment_status==="ambiguous"?"Multiple possible matches — manual review required":"No matching transaction recorded");content.append(dl);
+ pair(dl,it.submission_kind==="plaque"?"Display permission":"Photo permission",it.consent_to_display?"Yes":"No");pair(dl,"Payment record",it.payment_status==="legacy_verified"?"Existing Foundation donation verified — final review required":it.payment_status==="recorded_for_review"?"Matching transaction received — needs verification":it.payment_status==="ambiguous"?"Multiple possible matches — manual review required":"No matching transaction recorded");content.append(dl);
  const actions=el("div",undefined,"actions");
  for(const [decision,label,style] of [["approved",it.submission_kind==="plaque"?"Approve plaque":"Approve photo","approve"],["rejected",it.submission_kind==="plaque"?"Reject plaque":"Reject photo","reject"],["pending","Reset pending","outline"]]){
  const button=el("button",label,style);button.type="button";button.disabled=it.status===decision;
@@ -96,10 +96,10 @@ async function load(){
  const typeLabel=el("label","Tribute dedication");const kind=el("select");
  for(const [value,label] of [["memory","In Memory Of"],["honor","In Honor Of"]]){const option=el("option",label);option.value=value;kind.append(option)}
  if(it.tribute_type)kind.value=it.tribute_type;typeLabel.append(kind);finalBox.append(typeLabel);
- const consentLabel=el("label","Confirm Givebutter public-display permission");const consent=el("input");consent.type="checkbox";consent.style.width="auto";consentLabel.prepend(consent);finalBox.append(consentLabel);
+ const consentLabel=el("label","Confirm donor permission for public display");const consent=el("input");consent.type="checkbox";consent.style.width="auto";consentLabel.prepend(consent);finalBox.append(consentLabel);
  const publishButton=el("button","Publish Tribute to Wall","publish-button");
  publishButton.type="button";
- const canPublish=it.payment_status!=="published"&&it.status==="approved"&&it.consent_to_display===true&&it.payment_status==="recorded_for_review"&&!!it.transaction_id;
+ const canPublish=it.payment_status!=="published"&&it.status==="approved"&&it.consent_to_display===true&&(it.payment_status==="recorded_for_review"||it.payment_status==="legacy_verified")&&!!it.transaction_id;
  publishButton.disabled=!canPublish;
  if(!canPublish){publishButton.textContent=it.payment_status==="published"?"Already Published":"Publish Tribute — Awaiting Payment Verification";publishButton.title="Requires an approved tribute and matching successful Givebutter transaction";}
  else publishButton.addEventListener("click",async()=>{
@@ -110,7 +110,7 @@ async function load(){
   catch(err){display(reviewStatus,err.message);publishButton.disabled=false}
  });
  finalBox.append(publishButton);content.append(finalBox);card.append(content);
- const group=it.payment_status==="published"?"publishedItems":it.status==="rejected"?"rejectedItems":it.status==="pending"?"pendingItems":it.payment_status==="recorded_for_review"||it.payment_status==="ambiguous"?"matchingItems":"waitingItems";
+ const group=it.payment_status==="published"?"publishedItems":it.status==="rejected"?"rejectedItems":it.status==="pending"?"pendingItems":it.payment_status==="recorded_for_review"||it.payment_status==="legacy_verified"||it.payment_status==="ambiguous"?"matchingItems":"waitingItems";
  document.getElementById(group).append(card);counts[group]++;
  }
  for(const [group,count] of Object.entries(counts)){const label={pendingItems:"pendingCount",waitingItems:"waitingCount",matchingItems:"matchingCount",rejectedItems:"rejectedCount",publishedItems:"publishedCount"}[group];document.getElementById(label).textContent=String(count);}
