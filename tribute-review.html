@@ -74,7 +74,7 @@ async function load(){
  const card=el("article",undefined,"item");
  if(it.preview_url){const img=el("img");img.src=it.preview_url;img.alt="Photo submitted for "+it.honoree_name;img.referrerPolicy="no-referrer";card.append(img)}
  const content=el("div",undefined,"item-content");
- content.append(el("span",it.status,"pill"),el("h3",it.honoree_name));
+ content.append(el("span",(it.submission_kind==="plaque"?"Plaque · ":"Photo · ")+it.status,"pill"),el("h3",it.honoree_name));if(it.submission_kind==="plaque")content.append(el("p",it.tribute_message||"","note"));
  const dl=el("dl");pair(dl,"Submitted by",it.donor_name);pair(dl,"Email",it.donor_email);
  pair(dl,"Receipt reference",it.donation_reference);pair(dl,"Date",new Date(it.submitted_at).toLocaleString());
  pair(dl,"Photo permission",it.consent_to_display?"Yes":"No");pair(dl,"Payment record",it.payment_status==="recorded_for_review"?"Matching transaction received — needs verification":it.payment_status==="ambiguous"?"Multiple possible matches — manual review required":"No matching transaction recorded");content.append(dl);
@@ -84,7 +84,7 @@ async function load(){
  button.addEventListener("click",async()=>{
   if(!window.confirm(label+" for "+it.honoree_name+"? This does not publish a tribute."))return;
   button.disabled=true;
-  try{await call("POST",{id:it.id,decision});await load()}catch(err){display(reviewStatus,err.message);button.disabled=false}
+  try{await call("POST",{id:it.id,decision,submission_kind:it.submission_kind||"photo"});await load()}catch(err){display(reviewStatus,err.message);button.disabled=false}
  });
  actions.append(button);
  }
