@@ -108,11 +108,34 @@
 .tribute-feature .tribute-kind{color:#e1bf79;text-shadow:0 1px 1px #000}
 .tribute-feature .tribute-person{color:#f8db9d;font:normal 31px Georgia,serif;text-shadow:0 2px 1px #000,0 0 9px rgba(241,188,78,.15)}
 .tribute-feature .tribute-words{color:#e9d5a4;font:italic 15px Georgia,serif}
+ .tribute-feature .tribute-home-photo{width:96px;height:105px;object-fit:contain;margin:8px auto;border:2px solid #d8a33a}.tribute-feature .tribute-row.moving{margin-left:0;margin-right:0}
 </style>
 <div class="wrap"><div class="tribute-eyebrow">Honoring Lives and Legacies</div><h2 id="tribute-feature-title">Wall of Honor &amp; Remembrance</h2><p class="tribute-intro">Forever remembered. Always honored.</p>
-<div class="tribute-window"><div class="tribute-row" id="homeTributeRow"><article class="tribute-plaque" aria-label="In loving memory of Donald Hensley"><div class="tribute-plaque-inner"><span style="color:#e4c182;font-size:25px;margin-bottom:12px" aria-hidden="true">✦</span><span class="tribute-kind">In Loving Memory of</span><span class="tribute-person">Donald Hensley</span><span class="tribute-words">Forever Remembered. Always Honored.</span></div></article></div></div>
+<div class="tribute-window"><div class="tribute-row" id="homeTributeRow"><p class="tribute-intro">Loading approved tributes…</p></div></div>
 <a class="tribute-link" href="tribute-wall.html">Visit the Tribute Wall →</a></div>
-<script>(function(){const row=document.getElementById('homeTributeRow');const cards=[...row.children];if(cards.length<2)return;cards.forEach(card=>{const dup=card.cloneNode(true);dup.setAttribute('aria-hidden','true');row.appendChild(dup)});row.classList.add('moving')})();</script>
+<script>
+(function(){
+ const row=document.getElementById("homeTributeRow");
+ const make=(tag,cls,value)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(value!=null)node.textContent=String(value);return node};
+ fetch("https://etvfgmdsgblgffsllcib.supabase.co/functions/v1/public-tributes")
+ .then(r=>{if(!r.ok)throw Error("Tributes unavailable");return r.json()})
+ .then(data=>{
+   const tributes=Array.isArray(data.tributes)?data.tributes:[];
+   row.replaceChildren();
+   if(!tributes.length){row.append(make("p","tribute-intro","Visit our Tribute Wall to honor someone special."));return}
+   for(const t of tributes){
+     const card=make("article","tribute-plaque");card.setAttribute("aria-label",(t.tribute_type==="honor"?"In honor of ":"In memory of ")+(t.honoree_name||""));
+     const inside=make("div","tribute-plaque-inner");
+     inside.append(make("span","tribute-kind",t.tribute_type==="honor"?"In Honor Of":"In Loving Memory Of"),make("span","tribute-person",t.honoree_name||"With Love"));
+     if(t.tribute_style==="photo"&&t.photo_url){const img=make("img","tribute-home-photo");img.src=t.photo_url;img.alt="Approved tribute photo";img.loading="lazy";inside.append(img)}
+     if(t.tribute_message)inside.append(make("span","tribute-words",t.tribute_message));
+     card.append(inside);row.append(card);
+   }
+   if(tributes.length>1){for(const card of [...row.children]){const dup=card.cloneNode(true);dup.setAttribute("aria-hidden","true");row.append(dup)}row.classList.add("moving")}
+ })
+ .catch(()=>{row.replaceChildren(make("p","tribute-intro","View approved memorials on the Tribute Wall."))});
+})();
+</script>
 </section>
 <section class="donate"><div class="wrap donate-layout"><img class="donate-logo" src="assets/foundaiton%20logo.jpg?v=20260821-donate" alt="Jeffersontown Police Foundation logo"><div><h2>Stand Behind Those Who Serve.</h2><p>Your support helps bridge resource gaps, strengthen officer training and wellness, foster trust and collaboration, and advance innovative, proactive public-safety strategies in Jeffersontown.</p><a class="wellness-btn" href="donate.html?ways=1">Explore Ways to Give →</a><p class="donate-contact">Jeffersontown Police Foundation<br>10513 Watterson Trail<br>Louisville, KY 40299<br>Federal Tax ID: 41-2319597</p></div></div></section>
 </main>
