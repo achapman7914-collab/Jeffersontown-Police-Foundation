@@ -45,7 +45,12 @@
 .tribute-graphic-hero .hero-donation-hit{position:absolute;left:16.4%;top:69%;width:32.5%;height:10%;display:block;z-index:2;border-radius:6px}
 .tribute-graphic-hero .hero-donation-hit:focus-visible{outline:4px solid #fff;outline-offset:2px}
 .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-</style><style>.wall-section{margin-bottom:20px}.tribute-wall-action{text-align:center;padding:44px 18px 58px}.tribute-wall-action h2{font:normal clamp(28px,4vw,42px) Georgia,serif;margin:0 0 12px}.tribute-wall-action p{max-width:670px;margin:0 auto 22px;color:#526071}.tribute-wall-action a{display:inline-block;background:#d6a44e;color:#07192f;padding:14px 28px;border-radius:4px;font-weight:800;text-decoration:none}</style></head><body>
+</style><style>.wall-section{margin-bottom:20px}.tribute-wall-action{text-align:center;padding:44px 18px 58px}.tribute-wall-action h2{font:normal clamp(28px,4vw,42px) Georgia,serif;margin:0 0 12px}.tribute-wall-action p{max-width:670px;margin:0 auto 22px;color:#526071}.tribute-wall-action a{display:inline-block;background:#d6a44e;color:#07192f;padding:14px 28px;border-radius:4px;font-weight:800;text-decoration:none}<style>
+.photo-tribute{width:280px;min-height:300px;padding:8px;border:8px ridge #c39b5c;background:linear-gradient(140deg,#d5b673,#594124,#b38a4b);box-shadow:0 10px 22px #0009}
+.photo-tribute .plaque-inner{padding:18px 12px;background:linear-gradient(140deg,#2c3440,#091726);border-color:#e4c58d}
+.photo-tribute .plaque-inner img{display:block;width:152px;height:158px;object-fit:contain;background:#172334;border:3px solid #cda75f;margin:9px auto}
+.photo-tribute h3{font-size:24px;margin:8px 0}.photo-tribute .plaque-message{font-size:12px}
+</style></head><body>
 <header class="site-head"><div class="wrap head-inner"><a class="brand" href="index.html"><img src="assets/foundaiton%20logo.jpg" alt="Jeffersontown Police Foundation logo"><span>Jeffersontown<br>Police Foundation</span></a><nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="index.html#support">Our Impact</a><a href="events.html">Events</a><a href="tribute-wall.html" aria-current="page">Tribute Wall</a><a href="create-tribute.html" class="donate">Create a Tribute</a></nav></div></header>
 <main><section class="hero tribute-graphic-hero" aria-label="Wall of Honor and Remembrance"><img src="assets/tribute-wall-banner.webp" alt="Wall of Honor and Remembrance — Honoring lives, celebrating legacies, with a patriotic memorial wall and tribute donation invitation" width="1672" height="941"><a class="hero-donation-hit" href="create-tribute.html" target="_blank" rel="noopener noreferrer" aria-label="Make a Tribute Donation through Givebutter"><span class="visually-hidden">Make a Tribute Donation</span></a></section>
 <div class="content"><div class="wrap"><div class="memorial-heading"><span>WALL OF HONOR &amp; REMEMBRANCE</span><h2>In Tribute and Remembrance</h2><p>Honoring lives and legacies through gifts to our community.</p></div><section class="wall-section" aria-labelledby="wallTitle"><div class="wall-top"><div><h2 id="wallTitle">Tribute Wall</h2><p>Forever remembered. Always honored.</p><a href="create-tribute.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:12px 0 6px;padding:13px 23px;background:#e8b765;color:#07192d;text-decoration:none;border-radius:4px;font-weight:800;font-size:14px">Create a Tribute →</a></div><div class="wall-controls" aria-label="Filter tributes"><button type="button" class="active" data-filter="all">All Tributes</button><button type="button" data-filter="memory">In Memory Of</button><button type="button" data-filter="honor">In Honor Of</button><button type="button" data-filter="photo">Photos</button><button type="button" data-filter="plaque">Plaques</button></div></div><div class="tribute-window"><div class="tribute-track" id="tributeTrack"></div><p class="empty-note" id="emptyNote">No tributes in this category yet.</p></div></section></div>
@@ -66,6 +71,10 @@
       const inside=element('div','plaque-inner');
       inside.append(element('span','rivets','✦'),element('span','plaque-kind',t.tribute_type==='honor'?'In Honor Of':'In Loving Memory Of'),element('h3','',t.honoree_name||'With Love'));
       if(t.tribute_message)inside.append(element('div','plaque-message',t.tribute_message));
+      if(t.tribute_style==='photo'&&t.photo_url){
+        card.classList.add('photo-tribute');
+        const photo=document.createElement('img');photo.src=t.photo_url;photo.alt='Approved tribute photograph of '+(t.honoree_name||'honoree');photo.loading='lazy';inside.insertBefore(photo,inside.children[2]);
+      }
       card.append(inside);track.append(card);
     });
     note.textContent=tributes.length===0?'The Tribute Wall is awaiting its first approved tribute.': 'No tributes in this category yet.';
