@@ -79,7 +79,7 @@ async function load(){
  pair(dl,"Receipt reference",it.donation_reference);pair(dl,"Date",new Date(it.submitted_at).toLocaleString());
  pair(dl,it.submission_kind==="plaque"?"Display permission":"Photo permission",it.consent_to_display?"Yes":"No");pair(dl,"Payment record",it.payment_status==="published"?"Verified donation — tribute published":it.payment_status==="legacy_verified"?"Existing Foundation donation verified — final review required":it.payment_status==="recorded_for_review"?"Matching transaction received — needs verification":it.payment_status==="ambiguous"?"Multiple possible matches — manual review required":"No matching transaction recorded");content.append(dl);
  const actions=el("div",undefined,"actions");
- for(const [decision,label,style] of [["approved",it.submission_kind==="plaque"?"Approve plaque":"Approve photo","approve"],["rejected",it.submission_kind==="plaque"?"Reject plaque":"Reject photo","reject"],["pending","Reset pending","outline"]]){
+ if(it.payment_status!=="published")for(const [decision,label,style] of [["approved",it.submission_kind==="plaque"?"Approve plaque":"Approve photo","approve"],["rejected",it.submission_kind==="plaque"?"Reject plaque":"Reject photo","reject"],["pending","Reset pending","outline"]]){
  const button=el("button",label,style);button.type="button";button.disabled=it.status===decision;
  button.addEventListener("click",async()=>{
   if(decision==="approved"&&it.submission_kind==="plaque"&&!it.consent_to_display&&!consent.checked){display(reviewStatus,"To approve this earlier plaque, first check the donor publication-permission box in Final Publication Review.");return}
