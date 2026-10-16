@@ -54,9 +54,6 @@
 <footer class="foot"><img src="assets/foundaiton%20logo.jpg" alt=""><p>Jeffersontown Police Foundation · Supporting Today. Building Tomorrow.</p><a href="index.html">Return to homepage</a></footer>
 <script>
 (function(){
-  const photo=document.getElementById('photoSelect'), plaque=document.getElementById('plaqueSelect');
-  function choose(style){photo.setAttribute('aria-pressed',String(style==='photo'));plaque.setAttribute('aria-pressed',String(style==='plaque'))}
-  photo.addEventListener('click',()=>choose('photo'));plaque.addEventListener('click',()=>choose('plaque'));
   const track=document.getElementById('tributeTrack');
   const note=document.getElementById('emptyNote');
   let tributes=[],current='all';
