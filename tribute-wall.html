@@ -80,11 +80,40 @@
  .plaque,.photo-tribute{width:min(305px,82vw)}
  .tribute-track{gap:14px}
 }
+</style><style>
+/* Remembrance gallery: existing patriotic banner above is deliberately unchanged */
+.tribute-gallery-content{background:#f9f5eb;padding:24px 0 58px;position:relative}
+.tribute-gallery-content:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;background:radial-gradient(ellipse at 15% 85%,#e0d3b8 0%,transparent 43%),radial-gradient(ellipse at 88% 10%,#f0dbb1 0%,transparent 48%)}
+.tribute-gallery-wrap{position:relative;z-index:1}
+.tribute-gallery-content .wall-section{max-width:1250px;background:transparent;border:0;box-shadow:none;margin:0 auto;padding:0 0 25px;color:#091b33;overflow:visible}
+.tribute-gallery-content .wall-section:after{display:none}
+.tribute-gallery-content .wall-top{justify-content:center;position:relative;min-height:65px;border:0;padding:0 0 19px;margin:0 0 12px}
+.tribute-gallery-content .wall-controls{justify-content:center;gap:10px}
+.tribute-gallery-content .wall-controls button{background:#fff9ef;color:#162940;border:1px solid #d5bd94;border-radius:22px;padding:10px 17px;font-size:13px}
+.tribute-gallery-content .wall-controls button.active{background:#deb063;color:#07192d;border-color:#deb063}
+.gallery-create{position:absolute;right:0;top:0;display:inline-block;text-decoration:none;color:#15283a;background:#fff9ef;border:1px solid #bcae97;border-radius:22px;padding:10px 17px;font-size:13px;font-weight:650}
+.tribute-gallery-content .tribute-window{padding:8px 0 25px;min-height:280px;overflow:visible}
+.tribute-gallery-content .tribute-track{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));width:100%;gap:23px;align-items:stretch;justify-items:center;animation:none!important;transform:none!important}
+.tribute-gallery-content .plaque{width:100%;max-width:350px;min-height:260px;border:5px ridge #98794b;box-shadow:0 9px 22px #463a2f3d}
+.tribute-gallery-content .plaque-inner{min-height:245px}
+.tribute-gallery-content .photo-tribute{min-height:340px;max-width:350px}
+.tribute-gallery-content .empty-note{color:#35455a}
+.tribute-gallery-content .wall-section p{color:#35455a}
+.tribute-gallery-content .plaque-message{color:#ecd9b3}
+@media(max-width:900px){.gallery-create{position:static}.tribute-gallery-content .wall-top{flex-direction:column;gap:14px}.tribute-gallery-content .tribute-track{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}}
+@media(max-width:580px){.tribute-gallery-content .tribute-track{grid-template-columns:1fr}.tribute-gallery-content .plaque{width:min(100%,350px)}}
 </style></head><body>
 <header class="site-head"><div class="wrap head-inner"><a class="brand" href="index.html"><img src="assets/foundaiton%20logo.jpg" alt="Jeffersontown Police Foundation logo"><span>Jeffersontown<br>Police Foundation</span></a><nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="index.html#support">Our Impact</a><a href="events.html">Events</a><a href="tribute-wall.html" aria-current="page">Tribute Wall</a><a href="create-tribute.html" class="donate">Create a Tribute</a></nav></div></header>
 <main><section class="hero tribute-graphic-hero" aria-label="Wall of Honor and Remembrance"><img src="assets/tribute-wall-banner.webp" alt="Wall of Honor and Remembrance — Honoring lives, celebrating legacies, with a patriotic memorial wall and tribute donation invitation" width="1672" height="941"><a class="hero-donation-hit" href="create-tribute.html" target="_blank" rel="noopener noreferrer" aria-label="Make a Tribute Donation through Givebutter"><span class="visually-hidden">Make a Tribute Donation</span></a></section>
-<div class="content"><div class="wrap"><div class="memorial-heading"><span>WALL OF HONOR &amp; REMEMBRANCE</span><h2>In Tribute and Remembrance</h2><p>Honoring lives and legacies through gifts to our community.</p></div><section class="wall-section" aria-labelledby="wallTitle"><div class="wall-top"><div><h2 id="wallTitle">Tribute Wall</h2><p>Forever remembered. Always honored.</p></div><div class="wall-controls" aria-label="Filter tributes"><button type="button" class="active" data-filter="all">All Tributes</button><button type="button" data-filter="memory">In Memory Of</button><button type="button" data-filter="honor">In Honor Of</button><button type="button" data-filter="photo">Photos</button><button type="button" data-filter="plaque">Plaques</button></div></div><div class="tribute-window"><div class="tribute-track" id="tributeTrack"></div><p class="empty-note" id="emptyNote">No tributes in this category yet.</p></div></section></div>
-</div></div>
+<div class="content tribute-gallery-content"><div class="wrap tribute-gallery-wrap">
+<section class="wall-section" aria-labelledby="wallTitle">
+  <div class="wall-top">
+    <div class="wall-controls" aria-label="Filter tributes"><button type="button" class="active" data-filter="all">All Tributes</button><button type="button" data-filter="memory">In Memory Of</button><button type="button" data-filter="honor">In Honor Of</button><button type="button" data-filter="photo">Photos</button><button type="button" data-filter="plaque">Plaques</button></div>
+    <a class="gallery-create" href="create-tribute.html">+ Create a Tribute</a>
+  </div>
+  <h2 id="wallTitle" class="visually-hidden">Wall of Honor &amp; Remembrance Tributes</h2>
+  <div class="tribute-window"><div class="tribute-track" id="tributeTrack"></div><p class="empty-note" id="emptyNote">No tributes in this category yet.</p></div>
+</section></div></div>
 <section class="tribute-wall-action"><h2>Their Legacy. Our Commitment.</h2><p>Honor someone special with a lasting tribute. Your gift supports the Jeffersontown Police Foundation and the community it serves.</p><a href="create-tribute.html">Create a Tribute →</a></section></main>
 <footer class="foot"><img src="assets/foundaiton%20logo.jpg" alt=""><p>Jeffersontown Police Foundation · Supporting Today. Building Tomorrow.</p><a href="index.html">Return to homepage</a></footer>
 <script>
@@ -110,7 +139,7 @@
     note.textContent=tributes.length===0?'The Tribute Wall is awaiting its first approved tribute.': 'No tributes in this category yet.';
     note.style.display=filtered.length?'none':'block';track.style.display=filtered.length?'flex':'none';
     track.classList.remove('moving');
-    if(filtered.length>3){Array.from(track.children).forEach(n=>{const clone=n.cloneNode(true);clone.setAttribute('aria-hidden','true');track.append(clone)});track.classList.add('moving')}
+    // Gallery cards remain stationary for a respectful, easy-to-read memorial display.
   }
   document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{
     document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===button));
