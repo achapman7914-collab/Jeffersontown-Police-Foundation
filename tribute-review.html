@@ -82,9 +82,10 @@ async function load(){
  for(const [decision,label,style] of [["approved",it.submission_kind==="plaque"?"Approve plaque":"Approve photo","approve"],["rejected",it.submission_kind==="plaque"?"Reject plaque":"Reject photo","reject"],["pending","Reset pending","outline"]]){
  const button=el("button",label,style);button.type="button";button.disabled=it.status===decision;
  button.addEventListener("click",async()=>{
+  if(decision==="approved"&&it.submission_kind==="plaque"&&!it.consent_to_display&&!consent.checked){display(reviewStatus,"To approve this earlier plaque, first check the donor publication-permission box in Final Publication Review.");return}
   if(!window.confirm(label+" for "+it.honoree_name+"? This does not publish a tribute."))return;
   button.disabled=true;
-  try{await call("POST",{id:it.id,decision,submission_kind:it.submission_kind||"photo"});await load()}catch(err){display(reviewStatus,err.message);button.disabled=false}
+  try{await call("POST",{id:it.id,decision,submission_kind:it.submission_kind||"photo",consent_confirmed:consent.checked});await load()}catch(err){display(reviewStatus,err.message);button.disabled=false}
  });
  actions.append(button);
  }
@@ -96,7 +97,7 @@ async function load(){
  const typeLabel=el("label","Tribute dedication");const kind=el("select");
  for(const [value,label] of [["memory","In Memory Of"],["honor","In Honor Of"]]){const option=el("option",label);option.value=value;kind.append(option)}
  if(it.tribute_type)kind.value=it.tribute_type;typeLabel.append(kind);finalBox.append(typeLabel);
- const consentLabel=el("label","Confirm donor permission for public display");const consent=el("input");consent.type="checkbox";consent.style.width="auto";consentLabel.prepend(consent);finalBox.append(consentLabel);
+ const consentLabel=el("label","I have confirmed the donor authorizes public display of this dedication");const consent=el("input");consent.type="checkbox";consent.style.width="auto";consentLabel.prepend(consent);finalBox.append(consentLabel);
  const publishButton=el("button","Publish Tribute to Wall","publish-button");
  publishButton.type="button";
  const canPublish=it.payment_status!=="published"&&it.status==="approved"&&it.consent_to_display===true&&(it.payment_status==="recorded_for_review"||it.payment_status==="legacy_verified")&&!!it.transaction_id;
