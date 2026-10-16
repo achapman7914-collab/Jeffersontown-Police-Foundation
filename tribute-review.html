@@ -37,7 +37,7 @@ button:disabled{opacity:.5;cursor:not-allowed}.outline{background:white;color:va
 <div class="toolbar"><div><h2>Photo Submissions</h2><p class="note">Approval means photo review only. It does not verify a payment or publish a tribute.</p></div><div><button id="refresh" class="outline" type="button">Refresh</button> <button id="logout" class="outline" type="button">Sign Out</button></div></div>
 <p id="reviewStatus" class="status" role="status"></p>
 <div class="review-groups">
-<section class="review-group"><h3>Pending Photo Review <span id="pendingCount">0</span></h3><div id="pendingItems" class="cards"></div></section>
+<section class="review-group"><h3>Pending Tribute Review <span id="pendingCount">0</span></h3><div id="pendingItems" class="cards"></div></section>
 <section class="review-group"><h3>Awaiting Payment <span id="waitingCount">0</span></h3><div id="waitingItems" class="cards"></div></section>
 <section class="review-group"><h3>Payment Match Needs Review <span id="matchingCount">0</span></h3><div id="matchingItems" class="cards"></div></section>
 <section class="review-group"><h3>Rejected Photos <span id="rejectedCount">0</span></h3><div id="rejectedItems" class="cards"></div></section>
@@ -77,9 +77,9 @@ async function load(){
  content.append(el("span",(it.submission_kind==="plaque"?"Plaque · ":"Photo · ")+it.status,"pill"),el("h3",it.honoree_name));if(it.submission_kind==="plaque")content.append(el("p",it.tribute_message||"","note"));
  const dl=el("dl");pair(dl,"Submitted by",it.donor_name);pair(dl,"Email",it.donor_email);
  pair(dl,"Receipt reference",it.donation_reference);pair(dl,"Date",new Date(it.submitted_at).toLocaleString());
- pair(dl,"Photo permission",it.consent_to_display?"Yes":"No");pair(dl,"Payment record",it.payment_status==="recorded_for_review"?"Matching transaction received — needs verification":it.payment_status==="ambiguous"?"Multiple possible matches — manual review required":"No matching transaction recorded");content.append(dl);
+ pair(dl,it.submission_kind==="plaque"?"Display permission":"Photo permission",it.consent_to_display?"Yes":"No");pair(dl,"Payment record",it.payment_status==="recorded_for_review"?"Matching transaction received — needs verification":it.payment_status==="ambiguous"?"Multiple possible matches — manual review required":"No matching transaction recorded");content.append(dl);
  const actions=el("div",undefined,"actions");
- for(const [decision,label,style] of [["approved","Approve photo","approve"],["rejected","Reject photo","reject"],["pending","Reset pending","outline"]]){
+ for(const [decision,label,style] of [["approved",it.submission_kind==="plaque"?"Approve plaque":"Approve photo","approve"],["rejected",it.submission_kind==="plaque"?"Reject plaque":"Reject photo","reject"],["pending","Reset pending","outline"]]){
  const button=el("button",label,style);button.type="button";button.disabled=it.status===decision;
  button.addEventListener("click",async()=>{
   if(!window.confirm(label+" for "+it.honoree_name+"? This does not publish a tribute."))return;
@@ -88,7 +88,7 @@ async function load(){
  });
  actions.append(button);
  }
- content.append(actions,el("p","Publishing requires an approved photo, public-display permission, a verified Givebutter donation, and final review of tribute details.","note"));
+ content.append(actions,el("p",it.submission_kind==="plaque"?"Plaque approval is private review only. Publication requires matching a successful Givebutter payment and a separate final check.":"Publishing requires an approved photo, public-display permission, a verified Givebutter donation, and final review of tribute details.","note"));
  const finalBox=el("div",undefined,"final-review");
  const title=el("h4","Final Publication Review");finalBox.append(title);
  const nameLabel=el("label","Honoree name (must match submission)");const honoree=el("input");honoree.value=it.honoree_name;honoree.maxLength=120;nameLabel.append(honoree);finalBox.append(nameLabel);
@@ -99,7 +99,7 @@ async function load(){
  const consentLabel=el("label","Confirm Givebutter public-display permission");const consent=el("input");consent.type="checkbox";consent.style.width="auto";consentLabel.prepend(consent);finalBox.append(consentLabel);
  const publishButton=el("button","Publish Tribute to Wall","publish-button");
  publishButton.type="button";
- const canPublish=it.payment_status!=="published"&&it.status==="approved"&&it.consent_to_display===true&&it.payment_status==="recorded_for_review"&&!!it.transaction_id;
+ const canPublish=it.submission_kind!=="plaque"&&it.payment_status!=="published"&&it.status==="approved"&&it.consent_to_display===true&&it.payment_status==="recorded_for_review"&&!!it.transaction_id;
  publishButton.disabled=!canPublish;
  if(!canPublish){publishButton.textContent=it.payment_status==="published"?"Already Published":"Publish Tribute — Awaiting Payment Verification";publishButton.title="Requires an approved photo and matching Givebutter transaction";}
  else publishButton.addEventListener("click",async()=>{
