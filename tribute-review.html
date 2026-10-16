@@ -82,7 +82,7 @@ async function load(){
  actions.append(button);
  }
  content.append(actions,el("p","Publishing requires an approved photo, public-display permission, a verified Givebutter donation, and final review of tribute details.","note"));
- card.append(content);items.append(card);
+ const publishButton=el("button","Publish Tribute — Awaiting Payment Verification","outline");publishButton.type="button";publishButton.disabled=true;publishButton.title="Publishing will be available after donation matching and final content review are implemented.";content.append(publishButton);card.append(content);items.append(card);
  }
  }catch(err){display(reviewStatus,err.message)}
 }
