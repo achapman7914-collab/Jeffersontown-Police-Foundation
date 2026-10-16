@@ -81,7 +81,7 @@ async function load(){
  });
  actions.append(button);
  }
- content.append(actions,el("p","Photo review does not automatically publish to the Tribute Wall.","note"));
+ content.append(actions,el("p","Publishing requires an approved photo, public-display permission, a verified Givebutter donation, and final review of tribute details.","note"));
  card.append(content);items.append(card);
  }
  }catch(err){display(reviewStatus,err.message)}
