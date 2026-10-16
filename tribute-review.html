@@ -41,7 +41,7 @@ button:disabled{opacity:.5;cursor:not-allowed}.outline{background:white;color:va
 <section class="review-group"><h3>Awaiting Payment <span id="waitingCount">0</span></h3><div id="waitingItems" class="cards"></div></section>
 <section class="review-group"><h3>Payment Match Needs Review <span id="matchingCount">0</span></h3><div id="matchingItems" class="cards"></div></section>
 <section class="review-group"><h3>Rejected Photos <span id="rejectedCount">0</span></h3><div id="rejectedItems" class="cards"></div></section>
-<section class="review-group"><h3>Published Tributes</h3><p class="note">Publishing is not yet enabled. Published tribute tracking will appear here after final payment and content verification is completed.</p></section>
+<section class="review-group"><h3>Published Tributes <span id="publishedCount">0</span></h3><div id="publishedItems" class="cards"></div></section>
 </div></section>
 </main>
 <script type="module">
@@ -50,7 +50,7 @@ const db=createClient("https://etvfgmdsgblgffsllcib.supabase.co","sb_publishable
 const api="https://etvfgmdsgblgffsllcib.supabase.co/functions/v1/tribute-review-admin";
 const login=document.getElementById("login"),review=document.getElementById("review"),reset=document.getElementById("reset"),
  loginStatus=document.getElementById("loginStatus"),reviewStatus=document.getElementById("reviewStatus"),
- groupIds=["pendingItems","waitingItems","matchingItems","rejectedItems"];
+ groupIds=["pendingItems","waitingItems","matchingItems","rejectedItems","publishedItems"];
 const display=(node,message)=>{node.textContent=message};
 let recoveryMode=false;
 function showRecovery(){recoveryMode=true;login.style.display="none";review.style.display="none";reset.style.display="block";}
@@ -67,7 +67,7 @@ function pair(dl,label,value){dl.append(el("dt",label),el("dd",value||"—"))}
 async function load(){
  display(reviewStatus,"Loading submissions…");
  try{
- const {items:rows}=await call();for(const id of groupIds)document.getElementById(id).replaceChildren();const counts={pendingItems:0,waitingItems:0,matchingItems:0,rejectedItems:0};
+ const {items:rows}=await call();for(const id of groupIds)document.getElementById(id).replaceChildren();const counts={pendingItems:0,waitingItems:0,matchingItems:0,rejectedItems:0,publishedItems:0};
  if(!rows.length){display(reviewStatus,"No photographs have been submitted yet.");return}
  display(reviewStatus,rows.length+" submission(s) found.");
  for(const it of rows){
@@ -99,9 +99,9 @@ async function load(){
  const consentLabel=el("label","Confirm Givebutter public-display permission");const consent=el("input");consent.type="checkbox";consent.style.width="auto";consentLabel.prepend(consent);finalBox.append(consentLabel);
  const publishButton=el("button","Publish Tribute to Wall","publish-button");
  publishButton.type="button";
- const canPublish=it.status==="approved"&&it.consent_to_display===true&&it.payment_status==="recorded_for_review"&&!!it.transaction_id;
+ const canPublish=it.payment_status!=="published"&&it.status==="approved"&&it.consent_to_display===true&&it.payment_status==="recorded_for_review"&&!!it.transaction_id;
  publishButton.disabled=!canPublish;
- if(!canPublish){publishButton.textContent="Publish Tribute — Awaiting Payment Verification";publishButton.title="Requires an approved photo and matching Givebutter transaction";}
+ if(!canPublish){publishButton.textContent=it.payment_status==="published"?"Already Published":"Publish Tribute — Awaiting Payment Verification";publishButton.title="Requires an approved photo and matching Givebutter transaction";}
  else publishButton.addEventListener("click",async()=>{
   if(!consent.checked){display(reviewStatus,"First confirm public-display permission in Givebutter.");return}
   if(!window.confirm("Publish this tribute publicly? The photo, name, and message will be visible on the Foundation website."))return;
@@ -110,10 +110,10 @@ async function load(){
   catch(err){display(reviewStatus,err.message);publishButton.disabled=false}
  });
  finalBox.append(publishButton);content.append(finalBox);card.append(content);
- const group=it.status==="rejected"?"rejectedItems":it.status==="pending"?"pendingItems":it.payment_status==="recorded_for_review"||it.payment_status==="ambiguous"?"matchingItems":"waitingItems";
+ const group=it.payment_status==="published"?"publishedItems":it.status==="rejected"?"rejectedItems":it.status==="pending"?"pendingItems":it.payment_status==="recorded_for_review"||it.payment_status==="ambiguous"?"matchingItems":"waitingItems";
  document.getElementById(group).append(card);counts[group]++;
  }
- for(const [group,count] of Object.entries(counts)){const label={pendingItems:"pendingCount",waitingItems:"waitingCount",matchingItems:"matchingCount",rejectedItems:"rejectedCount"}[group];document.getElementById(label).textContent=String(count);}
+ for(const [group,count] of Object.entries(counts)){const label={pendingItems:"pendingCount",waitingItems:"waitingCount",matchingItems:"matchingCount",rejectedItems:"rejectedCount",publishedItems:"publishedCount"}[group];document.getElementById(label).textContent=String(count);}
  }catch(err){display(reviewStatus,err.message)}
 }
 async function init(){
